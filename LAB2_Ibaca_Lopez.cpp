@@ -2,10 +2,10 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <unistd.h> //Para la creación y comunicación de procesos usando fork()
-#include <sys/wait.h> //Para esperar a los procesos hijos
-#include <chrono> // Para medir tiempo
-#include <climits> // Constantes de límites enteros - Bellmand-Ford necesita "infinito"
+#include <unistd.h>   // Para la creación y comunicación de procesos usando fork()
+#include <sys/wait.h> // Para esperar a los procesos hijos
+#include <chrono>     // Para medir tiempo
+#include <climits>    // Constantes de límites enteros - Bellmand-Ford necesita "infinito"
 #include <algorithm>
 
 using namespace std;
@@ -41,15 +41,37 @@ vector<Arista> aristas;
 vector<int> distancias;
 vector<int> predecesor;
 
-
 // ======================================================
 // FUNCIONES
 // ======================================================
 
 // lee el archivo de entrada y carga los datos del .txt
 // tiene que leer numProcesos, numHilos, numNodos, nodoInicio, nodoFinal, origen, destino, peso...
-void leerArchivo(string nombreArchivo);
-    // hacer archivo >> dato; para guardar los primeros datos en las variables globales
+void leerArchivo(string nombreArchivo) {
+
+    ifstream archivo(nombreArchivo);
+    
+    if (!archivo.is_open()) {
+        cerr << "Error al abrir el archivo de entrada: " << nombreArchivo << endl;
+        exit(1);
+    }
+
+    int numHilos; // Solo se usa para saltar el dato de hilos (Java)
+    archivo >> numProcesos;
+    archivo >> numHilos; // Se ignora en C++
+    archivo >> numNodos;
+    archivo >> nodoInicio;
+    archivo >> nodoFinal;
+
+    aristas.clear();
+    int origen, destino, peso;
+
+    while (archivo >> origen >> destino >> peso) {
+        aristas.push_back({origen, destino, peso});
+    }
+
+    archivo.close();
+}
 
 // inicializa las distancias y predecesores para Bellman-Ford
 // tiene que preparar los vectores (distancias y predecesr) porque desde el nodo inicial -> si mismo (distancia es 0)
