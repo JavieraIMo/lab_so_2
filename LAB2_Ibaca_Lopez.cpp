@@ -75,14 +75,35 @@ void leerArchivo(string nombreArchivo) {
 
 // inicializa las distancias y predecesores para Bellman-Ford
 // tiene que preparar los vectores (distancias y predecesr) porque desde el nodo inicial -> si mismo (distancia es 0)
-void inicializarBellmanFord();
+void inicializarBellmanFord(){
+    distancias.assign(numNodos, INF); //crea el vector dejando todas las posiciones con infinito
+    predecesor.assign(numNodos, -1); //padres con -1 porque no se sabe por donde se llega a cada nodo
+    distancias[nodoInicio] = 0;
+}
 
 // divide las aristas entre los procesos hijos
 // reparte las conexiones entre los hijos y retorna el vector donde cada pos es una lista de aristas de un hijo
-vector<vector<Arista>> dividirAristas();
+vector<vector<Arista>> dividirAristas() {
+    vector<vector<Arista>> grupos(numProcesos);  // cada posicion es un hioj
 
+    for (int i = 0; i < (int)aristas.size(); i++) {
+        int procesoAsignado = i % numProcesos;
+        grupos[procesoAsignado].push_back(aristas[i]);
+    }
+
+    return grupos;
+}
 // crea un pipe para cada proceso hijo para la comunicación (pipes[i][2])
-void crearPipes(vector<vector<int>>& pipes);
+void crearPipes(vector<vector<int>>& pipes) {
+    pipes.resize(numProcesos, vector<int>(2)); 
+
+    for (int i = 0; i < numProcesos; i++) {
+        if (pipe(pipes[i].data()) == -1) {
+            cerr << "Error al crear pipe para el proceso " << i << endl;
+            exit(1);
+        }
+    }
+}
 
 // aqui va todo lo que hace cada hijo
 // cada hijo recibe aristas, distancias (copia) y lo del pipe
