@@ -93,10 +93,11 @@ vector<vector<Arista>> dividirAristas() {
 
     return grupos;
 }
+
 // crea un pipe para cada proceso hijo para la comunicación (pipes[i][2])
 void crearPipes(vector<vector<int>>& pipes) {
+    // mejor usar vector porque la cantidad de procesos puede cambiar segun .txt
     pipes.resize(numProcesos, vector<int>(2)); 
-
     for (int i = 0; i < numProcesos; i++) {
         if (pipe(pipes[i].data()) == -1) {
             cerr << "Error al crear pipe para el proceso " << i << endl;
