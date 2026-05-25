@@ -76,13 +76,36 @@ public class LAB2_Ibaca_Lopez {
 		}
 	}
 
-	// Inicializa distancias y predecesores
+	// Inicializa distancias y predecesores en infinito (excepto el nodo de inicio)
 	static void inicializarBellmanFord() {
+		
+		distancias = new int[numNodos];
+		predecesores = new int[numNodos];
+
+		for (int i = 0; i < numNodos; i++) {
+			distancias[i] = Integer.MAX_VALUE; // Representa infinito
+			predecesores[i] = -1; // Sin predecesor
+		}
+
+		distancias[nodoInicio] = 0;// la distancia al nodo de inicio es 0
 	}
 
-	// Divide las aristas entre los hilos
+	// Divide la lista de aristas en sublistas, asignando las aristas de forma equitativa (round-robin) a 
+	// cada hilo para balancear la carga de trabajo.
 	static ArrayList<ArrayList<Arista>> dividirAristas() {
-		return null;
+
+		ArrayList<ArrayList<Arista>> particiones = new ArrayList<>();
+
+		for (int i = 0; i < numHilos; i++) {// inicializa las sublistas vacías
+			particiones.add(new ArrayList<>());
+		}
+
+		for (int i = 0; i < aristas.size(); i++) {// distribuye las aristas de manera equitativa (round-robin)
+			int indiceHilo = i % numHilos;
+			particiones.get(indiceHilo).add(aristas.get(i));
+		}
+
+		return particiones;
 	}
 
 	// Trabajo de cada hilo
