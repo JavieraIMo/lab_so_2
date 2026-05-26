@@ -110,8 +110,24 @@ void crearPipes(vector<vector<int>>& pipes) {
 // cada hijo recibe aristas, distancias (copia) y lo del pipe
 // recorre las aristas y revisa si es que puede mejorar alguna de las distancias
 // cuando encuentra que una mejora, crea la actualizacion y lo manda al padre
-void trabajoHijo(vector<Arista> aristasAsignadas, int pipeEscritura);
-
+void trabajoHijo(vector<Arista> aristasAsignadas, int pipeEscritura){
+    vector<Actualizacion> actualizaciones;
+    for (Arista arista:aristasAsignadas){
+        if (distancias[arista.origen]!=INF && distancias[arista.origen]+arista.peso < distancias[arista.destino]){
+            Actualizacion act;
+            act.nodo= arista.destino;
+            act.distancia= distancias[arista.origen] + arista.peso;
+            act.padre= arista.origen;
+            actualizaciones.push_back(act);
+        }
+    }
+    int cantidad= actualizaciones.size();
+    write(pipeEscritura, &cantidad, sizeof(int));
+    write(pipeEscritura, actualizaciones.data(), cantidad*sizeof(Actualizacion));
+    close(pipeEscritura);
+    
+    exit(0);
+}
 // es la función usada por el padre para leer las actualizaciones que mandó un hijo
 vector<Actualizacion> leerPipe(int pipeLectura);
 
