@@ -31,20 +31,44 @@ Este laboratorio consiste en desarrollar un motor de búsqueda de rutas de alto 
 - El código debe ser limpio, legible y estar comentado  
 - La entrega es por GitHub el 27/05  
 - El informe técnico debe incluir pruebas, análisis comparativo y conclusiones  
-# Estado del Proyecto
 
-Actualmente implementado:
-- Estructura base de ambos programas (C++ y Java) creada.
-- Función de lectura de archivo implementada en ambos lenguajes.
-- Modularización inicial en Java y C++.
-- Makefile básico para compilar C++.
+## Estado del Motor Beta (Java)
 
-Pendiente:
-- Implementar la lógica completa de Bellman-Ford en ambos lenguajes.
-- Paralelización con fork/pipes en C++ y threads/sincronización en Java.
-- Detección de ciclos negativos y reconstrucción de ruta.
-- Salida detallada por pantalla y archivos de evidencia.
-- Pruebas, informe técnico y documentación final.
+### Implementado:
+- Estructura base y modularización del programa en Java.
+- Lectura y carga del archivo de entrada.
+- Inicialización de distancias y predecesores.
+- División equitativa de aristas entre hilos.
+- Clase de hilo (HiloBellmanFord) con lógica de relajación concurrente y prints de depuración.
+- Aplicación de actualizaciones propuestas por los hilos.
+- Detección de ciclos de peso negativo.
+- Reconstrucción de la ruta óptima con mensajes de depuración.
+
+### Pendiente:
+- Implementar el ciclo completo de Bellman-Ford (repetir iteraciones y aplicar actualizaciones en cada ronda).
+- Sincronización de barrera entre hilos por iteración (opcional para mayor control).
+- Salida detallada por pantalla según especificación (inicio, progreso por iteración, informe final).
+- Escritura del archivo salidaThread.txt con la ruta y latencia final.
+- Pruebas integrales y validación de casos borde.
+
+
+## Estado del Motor Alpha (C/C++)
+
+### Implementado:
+- Estructura base y modularización del programa en C++.
+- Lectura y carga del archivo de entrada.
+- Inicialización de distancias y predecesores.
+- División equitativa de aristas entre procesos.
+- Declaración de funciones para crear pipes, trabajo de hijos, aplicar actualizaciones, detectar ciclos negativos y reconstruir ruta.
+- Esqueleto de la función principal bellmanFordFork con pasos detallados en comentarios.
+- Makefile básico para compilar.
+
+### Pendiente:
+- Implementar la lógica completa de fork() y pipes para paralelización real.
+- Implementar la lógica interna de trabajoHijo, leerPipe, aplicarActualizaciones, detectarCicloNegativo, reconstruirRuta, imprimirRuta y guardarSalida.
+- Salida detallada por pantalla según especificación (inicio, progreso por iteración, informe final).
+- Escritura del archivo salidaFork.txt con la ruta y latencia final.
+- Pruebas integrales y validación de casos borde.
 
 ## Formato del archivo de entrada
 Debe seguir el formato especificado en el enunciado:

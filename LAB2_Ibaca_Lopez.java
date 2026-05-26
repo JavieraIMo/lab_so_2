@@ -203,9 +203,40 @@ public class LAB2_Ibaca_Lopez {
 		return false;
 	}
 
-	// Reconstruye la ruta
+	// Reconstruye la ruta óptima desde el nodo de inicio hasta el nodo final usando el arreglo de predecesores.
+	// Devuelve la secuencia de nodos de la ruta (del inicio al final). Si no hay ruta, retorna una lista vacia
 	static ArrayList<Integer> reconstruirRuta() {
-		return null;
+
+		ArrayList<Integer> ruta = new ArrayList<>();
+		int actual = nodoFinal;
+		System.out.println("[Reconstrucción] Reconstruyendo ruta desde el nodo final " + nodoFinal);
+
+		// si no hay ruta posible
+		if (distancias[nodoFinal] == Integer.MAX_VALUE) {
+			System.out.println("[Reconstrucción] No existe ruta al nodo final.");
+			return ruta;
+		}
+
+		// recorre los predecesores desde el nodo final hasta el inicio
+		while (actual != -1) {
+
+			ruta.add(actual);
+			System.out.println("[Reconstrucción] Nodo " + actual + " (padre: " + predecesores[actual] + ")");
+			if (actual == nodoInicio) break;
+			actual = predecesores[actual];
+		}
+
+		// si no se llegó al nodo de inicio, la ruta es inválida
+
+		if (ruta.get(ruta.size() - 1) != nodoInicio) {
+			System.out.println("[Reconstrucción] No se pudo llegar al nodo de inicio. Ruta inválida.");
+			return new ArrayList<>();
+		}
+
+		// invierte la ruta para que vaya de inicio a fin
+		Collections.reverse(ruta);
+		System.out.println("[Reconstrucción] Ruta reconstruida: " + ruta);
+		return ruta;
 	}
 
 	// Imprime la ruta
@@ -216,8 +247,21 @@ public class LAB2_Ibaca_Lopez {
 	static void guardarSalida(ArrayList<Integer> ruta, int latencia) {
 	}
 
-	// Ejecuta una iteración de Bellman-Ford con hilos 
-	static void bellmanFordThreads() {
+	/**
+	 * Ejecuta una iteración de Bellman-Ford paralelizada usando hilos.
+	 *
+	 * - Inicializa las estructuras de distancias y predecesores.
+	 * - Divide las aristas entre los hilos de forma balanceda.
+	 * - Crea una lista compartida para que los hilos propongan actualizaciones
+	 * - Lanza los hilos, cada uno procesa su subconjunto de aristas y propone actualizaciones si encuentra mejores rutas.
+	 * - Espera a que todos los hilos terminen.
+	 * - Muestra por consola las actualizaciones propuestas por los hilos
+	 *
+	 * Esta función actualmnte ejecuta solo una iteración (no el ciclo completo de Bellman-Ford),
+	 * por lo que sirve para probar la concurrencia y la lógica de reparto de trabajo.
+	 * Para la versión final, se debe repetir este proceso por (numNodos - 1) iteraciones y aplicar las actualizaciones en cada ronda
+	 */
+		static void bellmanFordThreads() {
 		System.out.println("=== INICIO bellmanFordThreads ===\n");
 		inicializarBellmanFord();
 		ArrayList<ArrayList<Arista>> particiones = dividirAristas();
