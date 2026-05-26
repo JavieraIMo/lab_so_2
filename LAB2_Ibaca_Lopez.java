@@ -126,7 +126,7 @@ public class LAB2_Ibaca_Lopez {
 		 * propuesta de actualización a la lista compartida. Los mensajes por consola permiten
 		 * seguir el flujo de ejecución y depurar el comportamiento concurrente.
 		 */
-		@Override
+		@Override // sobreescribe el metodo run para asegurarse de que reemplace el comportamiento, no que cree uno nuevo por error
 		public void run() {
 			System.out.println("[Hilo " + Thread.currentThread().getId() + "] Iniciando procesamiento de " + aristasAsignadas.size() + " aristas");
 			for (Arista arista : aristasAsignadas) {
@@ -153,13 +153,53 @@ public class LAB2_Ibaca_Lopez {
 		}
 	}
 
-	// Aplica actualizaciones
+	// Aplica las actualizaciones propuestas por los hilos a los arreglos de distancias y predecesores,
+	// retorna true si al menos una distancia fue actualizada (hubo cambios en la iteración).
 	static boolean aplicarActualizaciones(List<Actualizacion> actualizaciones) {
-		return false;
+
+		boolean hubocambios = false;
+
+		for (Actualizacion act : actualizaciones) {
+
+			int nodo = act.nodo;
+			int nuevadistancia = act.distancia;
+			int nuevopadre = act.padre;
+			
+			if (nuevadistancia < distancias[nodo]) {// si la nueva distancia es mejor, actualza y marca que hubo cambios
+
+				System.out.println("[Actualización] Nodo " + nodo + 
+									": distancia " + distancias[nodo] + 
+									" -> " + nuevadistancia + 
+									", padre " + predecesores[nodo] + 
+									" -> " + nuevopadre);
+
+				distancias[nodo] = nuevadistancia;
+				predecesores[nodo] = nuevopadre;
+				hubocambios = true;
+			}
+		}
+
+		return hubocambios;
 	}
 
-	// Detecta ciclo negativo
+	// Detecta si existe un ciclo de peso negativo en el grafo después de las iteraciones principales de bellman
+	// si alguna arista aún puede ser relajada, entonces existe un ciclo negativo
 	static boolean detectarCicloNegativo() {
+
+		for (Arista arista : aristas) {
+
+			int u = arista.origen; // nodo origen
+			int v = arista.destino; // nodo destino
+			int peso = arista.peso; // peso de la arista
+
+			// si la distancia al nodo origen no es infinita y se puede relajar la arista, hay ciclo negativo asi que retorna true
+			if (distancias[u] != Integer.MAX_VALUE && distancias[u] + peso < distancias[v]) {
+
+				System.out.println("[OJO PIOJO] Ciclo de peso negativo detectado en la arista " + u + " -> " + v);
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -178,14 +218,14 @@ public class LAB2_Ibaca_Lopez {
 
 	// Ejecuta una iteración de Bellman-Ford con hilos 
 	static void bellmanFordThreads() {
-		System.out.println("=== INICIO bellmanFordThreads ===");
+		System.out.println("=== INICIO bellmanFordThreads ===\n");
 		inicializarBellmanFord();
 		ArrayList<ArrayList<Arista>> particiones = dividirAristas();
 
-		// Lista compartida para actualizaciones
+		// lista compartida para actualizaciones
 		List<Actualizacion> actualizacionesCompartidas = Collections.synchronizedList(new ArrayList<>());
 
-		// Crear y lanzar los hilos
+		// se crea los hilos e inicia su ejecución
 		List<Thread> hilos = new ArrayList<>();
 		for (int i = 0; i < numHilos; i++) {
 			Thread hilo = new HiloBellmanFord(particiones.get(i), actualizacionesCompartidas);
@@ -193,7 +233,7 @@ public class LAB2_Ibaca_Lopez {
 			hilo.start();
 		}
 
-		// Esperar a que todos los hilos terminen
+		// se espera a que todos los hilos terminen
 		for (Thread hilo : hilos) {
 			try {
 				hilo.join();
@@ -202,19 +242,21 @@ public class LAB2_Ibaca_Lopez {
 			}
 		}
 
-		// Mostrar actualizaciones propuestas
-		System.out.println("Actualizaciones propuestas por los hilos:");
+		// se muestran las actualizaciones propuestas
+		System.out.println("\nactualizaciones propuestas por los hilos:\n");
+
 		for (Actualizacion act : actualizacionesCompartidas) {
 			System.out.println("  Nodo: " + act.nodo + ", Distancia: " + act.distancia + ", Padre: " + act.padre);
 		}
-		System.out.println("=== FIN bellmanFordThreads ===");
+
+		System.out.println("\n=== FIN bellmanFordThreads ===");
 	}
 
 	// Main
 	public static void main(String[] args) {
         
 		if (args.length != 1) {
-			System.out.println("archivo.txt");
+			System.out.println("falló leer archivo.txt");
 			return;
 		}
 
