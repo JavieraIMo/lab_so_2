@@ -108,13 +108,48 @@ public class LAB2_Ibaca_Lopez {
 		return particiones;
 	}
 
-	// Trabajo de cada hilo
+	// Cada hilo procesa un subconjunto de aristas y, si encuentra una relajación posible,
+	// propone una actualización de distancia y predecesor agregándola a una lista compartida.
 	static class HiloBellmanFord extends Thread {
 		ArrayList<Arista> aristasAsignadas;
-		HiloBellmanFord(ArrayList<Arista> aristas) {
+		List<Actualizacion> actualizacionesCompartidas;
+
+		// Constructor recibe las aristas y la lista compartida de actualizaciones
+		HiloBellmanFord(ArrayList<Arista> aristas, List<Actualizacion> actualizacionesCompartidas) {
 			this.aristasAsignadas = aristas;
+			this.actualizacionesCompartidas = actualizacionesCompartidas;
 		}
+
+		/**
+		 * Procesa las aristas asignadas al hilo. Por cada arista, verifica si se puede relajar
+		 * (es decir, si se encuentra un camino más corto al nodo destino). Si es así, agrega una
+		 * propuesta de actualización a la lista compartida. Los mensajes por consola permiten
+		 * seguir el flujo de ejecución y depurar el comportamiento concurrente.
+		 */
+		@Override
 		public void run() {
+			System.out.println("[Hilo " + Thread.currentThread().getId() + "] Iniciando procesamiento de " + aristasAsignadas.size() + " aristas");
+			for (Arista arista : aristasAsignadas) {
+				int u = arista.origen;
+				int v = arista.destino;
+				int peso = arista.peso;
+
+				// Lee la distancia actual al nodo origen de forma segura
+				int distanciaU;
+				synchronized (distancias) {
+					distanciaU = distancias[u];
+				}
+
+				// Si se puede relajar la arista, propone una actualización
+				if (distanciaU != Integer.MAX_VALUE && distanciaU + peso < distancias[v]) {
+					System.out.println("[Hilo " + Thread.currentThread().getId() + "] Relajando arista " + u + " -> " + v + " con peso " + peso);
+					// Agrega la actualización a la lista compartida de manera segura
+					synchronized (actualizacionesCompartidas) {
+						actualizacionesCompartidas.add(new Actualizacion(v, distanciaU + peso, u));
+					}
+				}
+			}
+			System.out.println("[Hilo " + Thread.currentThread().getId() + "] Finalizó procesamiento");
 		}
 	}
 
@@ -141,8 +176,38 @@ public class LAB2_Ibaca_Lopez {
 	static void guardarSalida(ArrayList<Integer> ruta, int latencia) {
 	}
 
-	// Ejecuta Bellman-Ford con hilos
+	// Ejecuta una iteración de Bellman-Ford con hilos 
 	static void bellmanFordThreads() {
+		System.out.println("=== INICIO bellmanFordThreads ===");
+		inicializarBellmanFord();
+		ArrayList<ArrayList<Arista>> particiones = dividirAristas();
+
+		// Lista compartida para actualizaciones
+		List<Actualizacion> actualizacionesCompartidas = Collections.synchronizedList(new ArrayList<>());
+
+		// Crear y lanzar los hilos
+		List<Thread> hilos = new ArrayList<>();
+		for (int i = 0; i < numHilos; i++) {
+			Thread hilo = new HiloBellmanFord(particiones.get(i), actualizacionesCompartidas);
+			hilos.add(hilo);
+			hilo.start();
+		}
+
+		// Esperar a que todos los hilos terminen
+		for (Thread hilo : hilos) {
+			try {
+				hilo.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// Mostrar actualizaciones propuestas
+		System.out.println("Actualizaciones propuestas por los hilos:");
+		for (Actualizacion act : actualizacionesCompartidas) {
+			System.out.println("  Nodo: " + act.nodo + ", Distancia: " + act.distancia + ", Padre: " + act.padre);
+		}
+		System.out.println("=== FIN bellmanFordThreads ===");
 	}
 
 	// Main

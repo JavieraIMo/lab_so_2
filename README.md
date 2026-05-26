@@ -31,3 +31,26 @@ Este laboratorio consiste en desarrollar un motor de búsqueda de rutas de alto 
 - El código debe ser limpio, legible y estar comentado  
 - La entrega es por GitHub el 27/05  
 - El informe técnico debe incluir pruebas, análisis comparativo y conclusiones  
+# Estado del Proyecto
+
+Actualmente implementado:
+- Estructura base de ambos programas (C++ y Java) creada.
+- Función de lectura de archivo implementada en ambos lenguajes.
+- Modularización inicial en Java y C++.
+- Makefile básico para compilar C++.
+
+Pendiente:
+- Implementar la lógica completa de Bellman-Ford en ambos lenguajes.
+- Paralelización con fork/pipes en C++ y threads/sincronización en Java.
+- Detección de ciclos negativos y reconstrucción de ruta.
+- Salida detallada por pantalla y archivos de evidencia.
+- Pruebas, informe técnico y documentación final.
+
+## Formato del archivo de entrada
+Debe seguir el formato especificado en el enunciado:
+1. Número de procesos (C++)
+2. Número de hilos (Java)
+3. Número de nodos
+4. Nodo de inicio
+5. Nodo final
+6. Lista de conexiones: origen destino peso
